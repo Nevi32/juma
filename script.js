@@ -37,10 +37,12 @@ window.addEventListener('scroll', () => {
     
     // Back to top button
     const backToTop = document.querySelector('.back-to-top');
-    if (window.scrollY > 500) {
-        backToTop.classList.add('active');
-    } else {
-        backToTop.classList.remove('active');
+    if (backToTop) {
+        if (window.scrollY > 500) {
+            backToTop.classList.add('active');
+        } else {
+            backToTop.classList.remove('active');
+        }
     }
 });
 
@@ -57,14 +59,16 @@ document.querySelectorAll('.nav-links a').forEach(link => {
 });
 
 // Back to top functionality
-document.querySelector('.back-to-top').addEventListener('click', () => {
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
+if (document.querySelector('.back-to-top')) {
+    document.querySelector('.back-to-top').addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
     });
-});
+}
 
-// Portfolio filter
+// Portfolio filter - Fixed version
 const filterBtns = document.querySelectorAll('.filter-btn');
 const portfolioItems = document.querySelectorAll('.portfolio-item');
 
@@ -83,23 +87,30 @@ filterBtns.forEach(btn => {
         portfolioItems.forEach(item => {
             if (filter === 'all' || item.classList.contains(filter)) {
                 item.style.display = 'block';
+                // Add small delay to allow display property to take effect before animation
                 setTimeout(() => {
-                    item.classList.add('animate');
-                }, 100);
+                    item.style.opacity = '1';
+                    item.style.transform = 'scale(1)';
+                }, 50);
             } else {
-                item.classList.remove('animate');
+                item.style.opacity = '0';
+                item.style.transform = 'scale(0.8)';
+                // Add transition delay before hiding completely
                 setTimeout(() => {
                     item.style.display = 'none';
-                }, 400);
+                }, 300); // This should match transition duration in CSS
             }
         });
     });
 });
 
-// Initialize portfolio items with animation
-portfolioItems.forEach((item, index) => {
-    item.style.animationDelay = `${index * 0.1}s`;
-    item.classList.add('animate');
+// Make sure portfolio items have proper initial state
+portfolioItems.forEach(item => {
+    item.style.display = 'block';
+    item.style.opacity = '1';
+    item.style.transform = 'scale(1)';
+    // Add transition for smooth animation
+    item.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
 });
 
 // Testimonial Slider
@@ -375,55 +386,6 @@ function typeEffect() {
         }, 1000); // Start typing after 1 second
     }
 }
-
-// Portfolio filter - Improved version
-const filterBtns = document.querySelectorAll('.filter-btn');
-const portfolioItems = document.querySelectorAll('.portfolio-item');
-
-filterBtns.forEach(btn => {
-    btn.addEventListener('click', function() {
-        // Remove active class from all buttons
-        filterBtns.forEach(btn => btn.classList.remove('active'));
-        
-        // Add active class to clicked button
-        this.classList.add('active');
-        
-        // Get filter value
-        const filterValue = this.getAttribute('data-filter');
-        
-        // Filter portfolio items
-        portfolioItems.forEach(item => {
-            if (filterValue === 'all') {
-                item.style.display = 'block';
-                setTimeout(() => {
-                    item.style.opacity = '1';
-                    item.style.transform = 'translateY(0)';
-                }, 50);
-            } else if (item.classList.contains(filterValue)) {
-                item.style.display = 'block';
-                setTimeout(() => {
-                    item.style.opacity = '1';
-                    item.style.transform = 'translateY(0)';
-                }, 50);
-            } else {
-                item.style.opacity = '0';
-                item.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    item.style.display = 'none';
-                }, 300);
-            }
-        });
-    });
-});
-
-// Initialize all portfolio items as visible
-window.addEventListener('load', () => {
-    portfolioItems.forEach(item => {
-        item.style.display = 'block';
-        item.style.opacity = '1';
-        item.style.transform = 'translateY(0)';
-    });
-});
 
 // Portfolio item details popup
 document.querySelectorAll('.portfolio-link').forEach(link => {
