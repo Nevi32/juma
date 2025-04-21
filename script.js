@@ -376,6 +376,55 @@ function typeEffect() {
     }
 }
 
+// Portfolio filter - Improved version
+const filterBtns = document.querySelectorAll('.filter-btn');
+const portfolioItems = document.querySelectorAll('.portfolio-item');
+
+filterBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+        // Remove active class from all buttons
+        filterBtns.forEach(btn => btn.classList.remove('active'));
+        
+        // Add active class to clicked button
+        this.classList.add('active');
+        
+        // Get filter value
+        const filterValue = this.getAttribute('data-filter');
+        
+        // Filter portfolio items
+        portfolioItems.forEach(item => {
+            if (filterValue === 'all') {
+                item.style.display = 'block';
+                setTimeout(() => {
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                }, 50);
+            } else if (item.classList.contains(filterValue)) {
+                item.style.display = 'block';
+                setTimeout(() => {
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                }, 50);
+            } else {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    item.style.display = 'none';
+                }, 300);
+            }
+        });
+    });
+});
+
+// Initialize all portfolio items as visible
+window.addEventListener('load', () => {
+    portfolioItems.forEach(item => {
+        item.style.display = 'block';
+        item.style.opacity = '1';
+        item.style.transform = 'translateY(0)';
+    });
+});
+
 // Portfolio item details popup
 document.querySelectorAll('.portfolio-link').forEach(link => {
     link.addEventListener('click', function(e) {
