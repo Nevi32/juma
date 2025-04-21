@@ -708,142 +708,634 @@
     </footer>
 
     <script>
-        // Initialize tabs
-        document.addEventListener('DOMContentLoaded', function() {
-            // Tab functionality
-            const tabs = document.querySelectorAll('.category-tab');
+       // Configuration
+const API_ENDPOINT = '/api/upload'; // Replace with your actual server endpoint
+const GALLERIES = {
+  'logoGallery': 'logo-design',
+  'posterGallery': 'poster-design',
+  'videoGallery': 'video-editing',
+  'socialGallery': 'social-media',
+  'cardGallery': 'business-cards',
+  'brandingGallery': 'corporate-branding'
+};
+
+// Initialize the application when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  initializeTabs();
+  initializePreviewFunctionality();
+  initializeFormSubmissions();
+  initializeMobileMenu();
+  initializeGalleryActions();
+  initializeLogoutButton();
+  
+  // Optional: Load existing items from the server
+  loadGalleryItems();
+});
+
+// Tab functionality
+function initializeTabs() {
+  const tabs = document.querySelectorAll('.category-tab');
+  
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabId = tab.getAttribute('data-tab');
+      
+      // Remove active class from all tabs and content
+      document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      // Add active class to current tab and content
+      tab.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    });
+  });
+}
+
+// Image and video preview functionality
+function initializePreviewFunctionality() {
+  // Simple preview setup
+  setupPreview('logoFile', 'logoPreview');
+  setupPreview('posterFile', 'posterPreview');
+  setupPreview('thumbFile', 'thumbPreview');
+  setupPreview('videoFile', 'videoPreview');
+  setupPreview('socialFile', 'socialPreview', 'socialVideoPreview');
+  setupPreview('cardFrontFile', 'cardFrontPreview');
+  setupPreview('cardBackFile', 'cardBackPreview');
+  setupPreview('brandingFile', 'brandingPreview');
+}
+
+// Function to set up file input preview
+function setupPreview(fileInputId, imgPreviewId, vidPreviewId = null) {
+  const fileInput = document.getElementById(fileInputId);
+  const imgPreview = document.getElementById(imgPreviewId);
+  const vidPreview = vidPreviewId ? document.getElementById(vidPreviewId) : null;
+  
+  if (!fileInput || !imgPreview) return;
+  
+  fileInput.addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    const uploadText = fileInput.closest('.file-upload').querySelector('.upload-text');
+    
+    if (file.type.startsWith('image/')) {
+      reader.onload = function(e) {
+        imgPreview.src = e.target.result;
+        imgPreview.style.display = 'block';
+        if (vidPreview) vidPreview.style.display = 'none';
+        if (uploadText) uploadText.style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    } else if (file.type.startsWith('video/') && vidPreview) {
+      reader.onload = function(e) {
+        vidPreview.src = e.target.result;
+        vidPreview.style.display = 'block';
+        imgPreview.style.display = 'none';
+        if (uploadText) uploadText.style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+  
+  // Add drag and drop functionality
+  const dropArea = fileInput.closest('.upload-preview');
+  
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, preventDefaults, false);
+  });
+  
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropArea.addEventListener(eventName, highlight, false);
+  });
+  
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, unhighlight, false);
+  });
+  
+  function highlight() {
+    dropArea.classList.add('highlight');
+  }
+  
+  function unhighlight() {
+    dropArea.classList.remove('highlight');
+  }
+  
+  dropArea.addEventListener('drop', handleDrop, false);
+  
+  function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const file = dt.files[0];
+    fileInput.files = dt.files;
+    
+    // Trigger the change event
+    const event = new Event('change');
+    fileInput.dispatchEvent(event);
+  }
+}
+
+// Form submission handling
+function initializeFormSubmissions() {
+  const forms = {
+    'logoForm': { gallery: 'logoGallery', type: 'logo' },
+    'posterForm': { gallery: 'posterGallery', type: 'poster' },
+    'videoForm': { gallery: 'videoGallery', type: 'video' },
+    'socialForm': { gallery: 'socialGallery', type: 'social-media' },
+    'cardForm': { gallery: 'cardGallery', type: 'business-card' },
+    'brandingForm': { gallery: 'brandingGallery', type: 'branding' }
+  };
+  
+  Object.keys(forms).forEach(formId => {
+    const form = document.getElementById(formId);
+    if (!form) return;
+    
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Validate form before submission
+      if (!validateForm(form)) {
+        showNotification('Please fill all required fields', 'error');
+        return;
+      }
+      
+      // Get the form data
+      const formData = new FormData(form);
+      formData.append('type', forms[formId].type);
+      
+      // Show loading state
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+      
+      // Send the data to the server
+      uploadFormData(formData)
+        .then(response => {
+          if (response.success) {
+            // Reset the form
+            form.reset();
             
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const tabId = tab.getAttribute('data-tab');
-                    
-                    // Remove active class from all tabs and content
-                    document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-                    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-                    
-                    // Add active class to current tab and content
-                    tab.classList.add('active');
-                    document.getElementById(tabId).classList.add('active');
-                });
-            });
+            // Reset previews
+            resetPreviews(form);
             
-            // Image preview functionality
-            function setupPreview(fileInput, imgPreview, vidPreview = null) {
-                fileInput.addEventListener('change', function() {
-                    const file = this.files[0];
-                    if (!file) return;
-                    
-                    const reader = new FileReader();
-                    
-                    if (file.type.startsWith('image/')) {
-                        reader.onload = function(e) {
-                            imgPreview.src = e.target.result;
-                            imgPreview.style.display = 'block';
-                            if (vidPreview) vidPreview.style.display = 'none';
-                            
-                            // Hide upload text
-                            const uploadText = fileInput.closest('.file-upload').querySelector('.upload-text');
-                            if (uploadText) uploadText.style.display = 'none';
-                        };
-                        reader.readAsDataURL(file);
-                    } else if (file.type.startsWith('video/') && vidPreview) {
-                        reader.onload = function(e) {
-                            vidPreview.src = e.target.result;
-                            vidPreview.style.display = 'block';
-                            imgPreview.style.display = 'none';
-                            
-                            // Hide upload text
-                            const uploadText = fileInput.closest('.file-upload').querySelector('.upload-text');
-                            if (uploadText) uploadText.style.display = 'none';
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
-            }
+            // Add the new item to the gallery
+            addItemToGallery(forms[formId].gallery, response.item);
             
-            // Set up all the preview functions
-            setupPreview(document.getElementById('logoFile'), document.getElementById('logoPreview'));
-            setupPreview(document.getElementById('posterFile'), document.getElementById('posterPreview'));
-            setupPreview(document.getElementById('thumbFile'), document.getElementById('thumbPreview'));
-            setupPreview(document.getElementById('videoFile'), document.getElementById('videoPreview'));
-            setupPreview(document.getElementById('socialFile'), document.getElementById('socialPreview'), document.getElementById('socialVideoPreview'));
-            setupPreview(document.getElementById('cardFrontFile'), document.getElementById('cardFrontPreview'));
-            setupPreview(document.getElementById('cardBackFile'), document.getElementById('cardBackPreview'));
-            setupPreview(document.getElementById('brandingFile'), document.getElementById('brandingPreview'));
-            
-            // Form submission - preventing default for demo
-            const forms = document.querySelectorAll('form');
-            forms.forEach(form => {
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    // In a real application, you would add AJAX code here to send the form data to a server
-                    alert('Form submitted successfully! (Demo only)');
-                    
-                    // Reset the form
-                    this.reset();
-                    
-                    // Reset any previews
-                    const previews = this.querySelectorAll('.upload-preview img, .upload-preview video');
-                    previews.forEach(preview => {
-                        preview.style.display = 'none';
-                        preview.src = '';
-                    });
-                    
-                    // Show upload text again
-                    const uploadTexts = this.querySelectorAll('.upload-text');
-                    uploadTexts.forEach(text => {
-                        text.style.display = 'block';
-                    });
-                });
-            });
-            
-            // Mobile menu toggle
-            const navToggle = document.querySelector('.nav-toggle');
-            const navLinks = document.querySelector('.nav-links');
-            
-            navToggle.addEventListener('click', () => {
-                navLinks.classList.toggle('show');
-            });
-            
-            // Gallery actions (for demo purposes)
-            const actionButtons = document.querySelectorAll('.item-actions button');
-            actionButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const action = this.getAttribute('title');
-                    const galleryItem = this.closest('.gallery-item');
-                    
-                    switch(action) {
-                        case 'Edit':
-                            alert('Edit functionality would open a form with this item\'s data');
-                            break;
-                        case 'Delete':
-                            if(confirm('Are you sure you want to delete this item?')) {
-                                galleryItem.remove();
-                                alert('Item deleted (demo only)');
-                            }
-                            break;
-                        case 'Play':
-                            alert('Video would play in a modal/lightbox');
-                            break;
-                        case 'View Back':
-                            alert('Would show the back of the business card');
-                            break;
-                    }
-                });
-            });
-            
-            // Logout button functionality (demo)
-            document.querySelector('.logout-btn').addEventListener('click', function(e) {
-                e.preventDefault();
-                if(confirm('Are you sure you want to logout?')) {
-                    alert('You would be logged out now (demo only)');
-                    // In a real app, redirect to login page
-                    // window.location.href = 'login.html';
-                }
-            });
+            // Show success message
+            showNotification(response.message || 'Upload successful!', 'success');
+          } else {
+            // Show error message
+            showNotification(response.message || 'Upload failed', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('Upload error:', error);
+          showNotification('Upload failed: ' + (error.message || 'Unknown error'), 'error');
+        })
+        .finally(() => {
+          // Reset button state
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
         });
+    });
+  });
+}
+
+// Function to validate form fields
+function validateForm(form) {
+  const requiredFields = form.querySelectorAll('[required]');
+  let valid = true;
+  
+  requiredFields.forEach(field => {
+    if (!field.value) {
+      field.classList.add('error');
+      valid = false;
+    } else {
+      field.classList.remove('error');
+    }
+  });
+  
+  return valid;
+}
+
+// Function to reset preview elements
+function resetPreviews(form) {
+  const previews = form.querySelectorAll('.upload-preview img, .upload-preview video');
+  previews.forEach(preview => {
+    preview.style.display = 'none';
+    preview.src = '';
+  });
+  
+  const uploadTexts = form.querySelectorAll('.upload-text');
+  uploadTexts.forEach(text => {
+    text.style.display = 'block';
+  });
+}
+
+// Function to upload form data to the server
+async function uploadFormData(formData) {
+  try {
+    const response = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      body: formData,
+      // If your API requires CSRF token or other headers, add them here
+      headers: {
+        // Example: 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    
+    return await response.json();
+    
+    // For demo/development - simulate a successful response if no real API is available
+    // return {
+    //   success: true,
+    //   message: 'Upload successful!',
+    //   item: {
+    //     id: Date.now(),
+    //     title: formData.get('title'),
+    //     client: formData.get('client'),
+    //     imageUrl: URL.createObjectURL(formData.get('file')),
+    //     description: formData.get('description'),
+    //     type: formData.get('type')
+    //   }
+    // };
+  } catch (error) {
+    console.error('Upload error:', error);
+    
+    // For development/testing
+    if (!API_ENDPOINT || API_ENDPOINT === '/api/upload') {
+      // Simulate a successful upload when no real API is available
+      console.warn('Using mock API response - in production, replace with real API endpoint');
+      
+      // Get the image file
+      let imageFile;
+      if (formData.get('type') === 'video') {
+        imageFile = formData.get('thumbFile');
+      } else if (formData.get('type') === 'business-card') {
+        imageFile = formData.get('cardFrontFile');
+      } else {
+        // Look for any file input
+        for (const [key, value] of formData.entries()) {
+          if (value instanceof File && value.type.startsWith('image/')) {
+            imageFile = value;
+            break;
+          }
+        }
+      }
+      
+      return {
+        success: true,
+        message: 'Upload successful! (Development mode)',
+        item: {
+          id: Date.now(),
+          title: formData.get('title'),
+          client: formData.get('client'),
+          imageUrl: imageFile ? URL.createObjectURL(imageFile) : '/api/placeholder/200/200',
+          description: formData.get('description') || '',
+          type: formData.get('type')
+        }
+      };
+    }
+    
+    throw error;
+  }
+}
+
+// Function to add a new item to the gallery
+function addItemToGallery(galleryId, item) {
+  const gallery = document.getElementById(galleryId);
+  if (!gallery) return;
+  
+  const itemElement = document.createElement('div');
+  itemElement.className = 'gallery-item';
+  itemElement.dataset.id = item.id;
+  
+  itemElement.innerHTML = `
+    <img src="${item.imageUrl}" alt="${item.title}">
+    <div class="item-overlay">
+      <div class="item-actions">
+        <button title="Edit" data-action="edit"><i class="fas fa-edit"></i></button>
+        <button title="Delete" data-action="delete"><i class="fas fa-trash"></i></button>
+        ${item.type === 'video' ? '<button title="Play" data-action="play"><i class="fas fa-play"></i></button>' : ''}
+        ${item.type === 'business-card' ? '<button title="View Back" data-action="flip"><i class="fas fa-sync-alt"></i></button>' : ''}
+      </div>
+    </div>
+    <div class="item-info">
+      <h4>${item.title}</h4>
+    </div>
+  `;
+  
+  // Add to the beginning of the gallery
+  gallery.insertBefore(itemElement, gallery.firstChild);
+  
+  // Setup action buttons
+  setupItemActions(itemElement);
+}
+
+// Function to load existing gallery items from the server
+function loadGalleryItems() {
+  Object.keys(GALLERIES).forEach(galleryId => {
+    const categoryType = GALLERIES[galleryId];
+    
+    // Fetch items for this category
+    fetch(`/api/items?type=${categoryType}`)
+      .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+      })
+      .then(data => {
+        if (data.success && Array.isArray(data.items)) {
+          const gallery = document.getElementById(galleryId);
+          if (!gallery) return;
+          
+          // Clear existing items (except for demo items during development)
+          // gallery.innerHTML = '';
+          
+          // Add each item to the gallery
+          data.items.forEach(item => {
+            addItemToGallery(galleryId, item);
+          });
+        }
+      })
+      .catch(error => {
+        console.warn(`Failed to load items for ${categoryType}:`, error);
+        // In development mode, we can leave the demo items
+      });
+  });
+}
+
+// Setup gallery item action buttons
+function initializeGalleryActions() {
+  document.querySelectorAll('.gallery-item').forEach(setupItemActions);
+}
+
+function setupItemActions(itemElement) {
+  const actionButtons = itemElement.querySelectorAll('.item-actions button');
+  
+  actionButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const action = this.getAttribute('data-action') || this.getAttribute('title').toLowerCase();
+      const galleryItem = this.closest('.gallery-item');
+      const itemId = galleryItem.dataset.id;
+      
+      switch(action) {
+        case 'edit':
+          editGalleryItem(itemId, galleryItem);
+          break;
+        case 'delete':
+          deleteGalleryItem(itemId, galleryItem);
+          break;
+        case 'play':
+          playVideo(itemId, galleryItem);
+          break;
+        case 'flip':
+        case 'view back':
+          flipBusinessCard(itemId, galleryItem);
+          break;
+      }
+    });
+  });
+}
+
+// Function to handle editing a gallery item
+function editGalleryItem(itemId, galleryItem) {
+  // In a real application, you would fetch the item data from the server
+  // For now, we'll show a simple notification
+  showNotification('Edit functionality would load this item\'s data into the form', 'info');
+  
+  // Scroll to the form
+  const galleryType = galleryItem.closest('.gallery-grid').id;
+  const tabId = GALLERIES[galleryType];
+  const tab = document.querySelector(`.category-tab[data-tab="${tabId}"]`);
+  
+  if (tab) {
+    // Activate the tab
+    tab.click();
+    
+    // Scroll to the form
+    const form = document.getElementById(tabId).querySelector('.upload-form');
+    if (form) {
+      form.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+}
+
+// Function to handle deleting a gallery item
+function deleteGalleryItem(itemId, galleryItem) {
+  if (confirm('Are you sure you want to delete this item?')) {
+    // Show loading state
+    galleryItem.classList.add('deleting');
+    
+    // Send delete request to the server
+    fetch(`/api/items/${itemId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        // Add any authentication headers if needed
+      }
+    })
+    .then(response => {
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        // Remove the item from the DOM
+        galleryItem.remove();
+        showNotification('Item deleted successfully', 'success');
+      } else {
+        throw new Error(data.message || 'Failed to delete item');
+      }
+    })
+    .catch(error => {
+      console.error('Delete error:', error);
+      
+      // For development/testing - simulate successful deletion when no API is available
+      if (!API_ENDPOINT || API_ENDPOINT === '/api/upload') {
+        galleryItem.remove();
+        showNotification('Item deleted (Development mode)', 'success');
+      } else {
+        galleryItem.classList.remove('deleting');
+        showNotification('Failed to delete item: ' + error.message, 'error');
+      }
+    });
+  }
+}
+
+// Function to handle playing a video
+function playVideo(itemId, galleryItem) {
+  // In a real application, you would fetch the video URL and display in a modal
+  // For now, we'll show a simple notification
+  showNotification('Video would play in a modal window', 'info');
+}
+
+// Function to handle flipping a business card
+function flipBusinessCard(itemId, galleryItem) {
+  // In a real application, you would fetch the back image and display it
+  // For now, we'll show a simple notification
+  showNotification('Would show the back of the business card', 'info');
+}
+
+// Mobile menu toggle
+function initializeMobileMenu() {
+  const navToggle = document.querySelector('.nav-toggle');
+  const navLinks = document.querySelector('.nav-links');
+  
+  if (navToggle && navLinks) {
+    navToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('show');
+    });
+  }
+}
+
+// Logout button functionality
+function initializeLogoutButton() {
+  const logoutBtn = document.querySelector('.logout-btn');
+  
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      if(confirm('Are you sure you want to logout?')) {
+        // Send logout request to the server
+        fetch('/api/logout', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => {
+          if (response.ok) {
+            window.location.href = 'login.html';
+          } else {
+            throw new Error('Logout failed');
+          }
+        })
+        .catch(error => {
+          console.error('Logout error:', error);
+          
+          // For development/testing
+          window.location.href = 'login.html';
+        });
+      }
+    });
+  }
+}
+
+// Notification system
+function showNotification(message, type = 'info') {
+  // Check if notification container exists, create if not
+  let notifContainer = document.getElementById('notification-container');
+  
+  if (!notifContainer) {
+    notifContainer = document.createElement('div');
+    notifContainer.id = 'notification-container';
+    notifContainer.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+    `;
+    document.body.appendChild(notifContainer);
+  }
+  
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.style.cssText = `
+    background-color: ${type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : '#2196f3'};
+    color: white;
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-width: 300px;
+    max-width: 500px;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s, transform 0.3s;
+  `;
+  
+  // Create message and close button
+  notification.innerHTML = `
+    <div>${message}</div>
+    <button style="background: none; border: none; color: white; cursor: pointer; margin-left: 10px;">
+      <i class="fas fa-times"></i>
+    </button>
+  `;
+  
+  // Add to container
+  notifContainer.appendChild(notification);
+  
+  // Animation
+  setTimeout(() => {
+    notification.style.opacity = '1';
+    notification.style.transform = 'translateY(0)';
+  }, 10);
+  
+  // Close button functionality
+  const closeBtn = notification.querySelector('button');
+  closeBtn.addEventListener('click', function() {
+    closeNotification(notification);
+  });
+  
+  // Auto close after 5 seconds
+  setTimeout(() => {
+    closeNotification(notification);
+  }, 5000);
+}
+
+function closeNotification(notification) {
+  notification.style.opacity = '0';
+  notification.style.transform = 'translateY(-20px)';
+  
+  setTimeout(() => {
+    notification.remove();
+  }, 300);
+}
+
+// Add a global CSS style for the notification container
+document.head.insertAdjacentHTML('beforeend', `
+  <style>
+    .upload-preview.highlight {
+      border-color: var(--primary-color);
+      background-color: rgba(255, 107, 107, 0.1);
+    }
+    
+    .gallery-item.deleting {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    
+    .form-group .error {
+      border-color: #f44336;
+      box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2);
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .fa-spinner {
+      animation: spin 1s linear infinite;
+    }
+  </style>
+`);
     </script>
 </body>
 </html>
