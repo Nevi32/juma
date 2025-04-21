@@ -37,12 +37,10 @@ window.addEventListener('scroll', () => {
     
     // Back to top button
     const backToTop = document.querySelector('.back-to-top');
-    if (backToTop) {
-        if (window.scrollY > 500) {
-            backToTop.classList.add('active');
-        } else {
-            backToTop.classList.remove('active');
-        }
+    if (window.scrollY > 500) {
+        backToTop.classList.add('active');
+    } else {
+        backToTop.classList.remove('active');
     }
 });
 
@@ -59,16 +57,14 @@ document.querySelectorAll('.nav-links a').forEach(link => {
 });
 
 // Back to top functionality
-if (document.querySelector('.back-to-top')) {
-    document.querySelector('.back-to-top').addEventListener('click', () => {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
+document.querySelector('.back-to-top').addEventListener('click', () => {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
     });
-}
+});
 
-// Portfolio filter - Fixed version
+// Portfolio filter
 const filterBtns = document.querySelectorAll('.filter-btn');
 const portfolioItems = document.querySelectorAll('.portfolio-item');
 
@@ -87,30 +83,23 @@ filterBtns.forEach(btn => {
         portfolioItems.forEach(item => {
             if (filter === 'all' || item.classList.contains(filter)) {
                 item.style.display = 'block';
-                // Add small delay to allow display property to take effect before animation
                 setTimeout(() => {
-                    item.style.opacity = '1';
-                    item.style.transform = 'scale(1)';
-                }, 50);
+                    item.classList.add('animate');
+                }, 100);
             } else {
-                item.style.opacity = '0';
-                item.style.transform = 'scale(0.8)';
-                // Add transition delay before hiding completely
+                item.classList.remove('animate');
                 setTimeout(() => {
                     item.style.display = 'none';
-                }, 300); // This should match transition duration in CSS
+                }, 400);
             }
         });
     });
 });
 
-// Make sure portfolio items have proper initial state
-portfolioItems.forEach(item => {
-    item.style.display = 'block';
-    item.style.opacity = '1';
-    item.style.transform = 'scale(1)';
-    // Add transition for smooth animation
-    item.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+// Initialize portfolio items with animation
+portfolioItems.forEach((item, index) => {
+    item.style.animationDelay = `${index * 0.1}s`;
+    item.classList.add('animate');
 });
 
 // Testimonial Slider
