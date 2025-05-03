@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Portfolio | ComPixels Studios</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+    <link rel="icon" href="WhatsApp Image 2025-04-19 at 2.36.35 PM.jpeg" type="image/jpeg">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+</head>
+<body>
+    <!-- Preloader -->
+    <div class="preloader">
+        <div class="logo-container">
+            <svg class="logo-svg" width="100" height="100" viewBox="0 0 100 100">
+                <polygon class="logo-shape" points="50,10 90,30 90,70 50,90 10,70 10,30" fill="#ff6b6b"></polygon>
+                <text x="50" y="55" text-anchor="middle" fill="#ffffff" font-size="12">CPXL</text>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Navigation - Same as landing page -->
+    <nav>
+        <div class="logo">
+            <span>ComPixels Studios</span>
+        </div>
+        <div class="nav-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html#hero">Home</a></li>
+            <li><a href="index.html#about">About</a></li>
+            <li><a href="index.html#services">Services</a></li>
+            <li><a href="portfolio.html" class="active">Portfolio</a></li>
+            <li><a href="index.html#testimonials">Testimonials</a></li>
+            <li><a href="index.html#contact" class="cta-btn">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- Portfolio Section - Same style as landing page -->
+    <section id="portfolio" class="portfolio">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <h2>Our <span class="accent">Portfolio</span></h2>
+                <div class="underline"></div>
+                <p>Explore our recent design projects</p>
+            </div>
+            
+            <!-- Dynamic Filter Buttons will be inserted here -->
+            <div class="portfolio-filter" data-aos="fade-up" id="filterButtons">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <!-- Categories will be added dynamically -->
+            </div>
+            
+            <!-- Portfolio Grid -->
+            <div class="portfolio-grid" id="portfolioGrid">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Loading portfolio projects...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer - Same as landing page -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h3>Compixels</h3>
+                    <p>Bringing your vision to life through creative design</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html#hero">Home</a></li>
+                        <li><a href="index.html#about">About</a></li>
+                        <li><a href="index.html#services">Services</a></li>
+                        <li><a href="portfolio.html">Portfolio</a></li>
+                        <li><a href="index.html#testimonials">Testimonials</a></li>
+                        <li><a href="index.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-services">
+                    <h4>Services</h4>
+                    <ul>
+                        <li>Logo Design</li>
+                        <li>Poster Design</li>
+                        <li>Video Editing</li>
+                        <li>Social Media Branding</li>
+                        <li>Business Cards</li>
+                        <li>Corporate Branding</li>
+                    </ul>
+                </div>
+                <div class="footer-newsletter">
+                    <h4>Newsletter</h4>
+                    <p>Subscribe to receive design tips and special offers</p>
+                    <form>
+                        <input type="email" placeholder="Your Email">
+                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Compixels. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WhatsApp Float Button - Same as landing page -->
+    <div class="whatsapp-float">
+        <a href="https://wa.me/254706844228" target="_blank" class="whatsapp-link">
+            <i class="fab fa-whatsapp"></i>
+            <span class="tooltip">Get in Touch</span>
+        </a>
+    </div>
+
+    <!-- Back to Top Button - Same as landing page -->
+    <div class="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <!-- Project Modal -->
+    <div class="project-modal" id="projectModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-image-container">
+                <img id="modalImage" src="" alt="Project Image">
+            </div>
+            <div class="modal-info">
+                <h3 id="modalTitle"></h3>
+                <p class="modal-category" id="modalCategory"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease',
+            once: true,
+            offset: 100
+        });
+
+        // Preloader - Same as landing page
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const preloader = document.querySelector('.preloader');
+                preloader.style.opacity = '0';
+                preloader.style.visibility = 'hidden';
+            }, 1500);
+        });
+
+        // Navigation Toggle - Same as landing page
+        const navToggle = document.querySelector('.nav-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        
+        navToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+            });
+        });
+
+        // Back to top functionality - Same as landing page
+        document.querySelector('.back-to-top').addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Show back to top button on scroll - Same as landing page
+        window.addEventListener('scroll', () => {
+            const backToTop = document.querySelector('.back-to-top');
+            if (window.scrollY > 500) {
+                backToTop.classList.add('active');
+            } else {
+                backToTop.classList.remove('active');
+            }
+        });
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB3gnDogubz8PUjmYyhQMTJ3V8bCmBp2mk",
+            authDomain: "pitia-11c72.firebaseapp.com",
+            projectId: "pitia-11c72",
+            storageBucket: "pitia-11c72.appspot.com",
+            messagingSenderId: "109156481662",
+            appId: "1:109156481662:web:d2822c6e7b5cbb11e0362f",
+            measurementId: "G-GN5M73D9YE"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const storage = firebase.storage();
+
+        // Portfolio Filter Functionality - Same as landing page
+        function setupFilterButtons() {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    filterBtns.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    btn.classList.add('active');
+                    
+                    // Get filter value
+                    const filter = btn.getAttribute('data-filter');
+                    
+                    // Filter portfolio items
+                    const portfolioItems = document.querySelectorAll('.portfolio-item');
+                    
+                    portfolioItems.forEach(item => {
+                        if (filter === 'all' || item.classList.contains(filter)) {
+                            item.style.display = 'block';
+                            setTimeout(() => {
+                                item.classList.add('animate');
+                            }, 100);
+                        } else {
+                            item.classList.remove('animate');
+                            setTimeout(() => {
+                                item.style.display = 'none';
+                            }, 400);
+                        }
+                    });
+                });
+            });
+        }
+
+        // Load Portfolio Items from Firebase
+        async function loadPortfolioItems() {
+            const portfolioGrid = document.getElementById('portfolioGrid');
+            const filterButtons = document.getElementById('filterButtons');
+            const loadingSpinner = document.querySelector('.loading-spinner');
+            
+            try {
+                // First list all folders (categories) in storage
+                const rootRef = storage.ref();
+                const folders = await rootRef.listAll();
+                
+                // Extract category names from the folders
+                const categories = [];
+                folders.prefixes.forEach(folderRef => {
+                    categories.push(folderRef.name);
+                });
+                
+                // Create filter buttons for each category found
+                if (categories.length > 0) {
+                    categories.forEach(category => {
+                        const btn = document.createElement('button');
+                        btn.className = 'filter-btn';
+                        btn.setAttribute('data-filter', category);
+                        btn.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+                        filterButtons.appendChild(btn);
+                    });
+                    
+                    // Initialize filter buttons
+                    setupFilterButtons();
+                }
+                
+                // Now load items from each category
+                let allItems = [];
+                
+                for (const category of categories) {
+                    const categoryRef = storage.ref(category);
+                    const items = await categoryRef.listAll();
+                    
+                    for (const itemRef of items.items) {
+                        try {
+                            const url = await itemRef.getDownloadURL();
+                            const filename = itemRef.name;
+                            let title = filename.split('_')[0];
+                            title = title.charAt(0).toUpperCase() + title.slice(1);
+                            title = title.replace(/-/g, ' ');
+                            
+                            allItems.push({
+                                title,
+                                category,
+                                url
+                            });
+                        } catch (error) {
+                            console.error("Error getting download URL:", error);
+                        }
+                    }
+                }
+                
+                // Clear loading spinner
+                loadingSpinner.style.display = 'none';
+                
+                // Display items
+                if (allItems.length > 0) {
+                    displayPortfolioItems(allItems);
+                } else {
+                    portfolioGrid.innerHTML = '<p>No portfolio items found.</p>';
+                }
+            } catch (error) {
+                console.error("Error loading portfolio:", error);
+                loadingSpinner.innerHTML = '<p>Error loading portfolio. Please try again later.</p>';
+            }
+        }
+
+        // Display Portfolio Items
+        function displayPortfolioItems(items) {
+            const portfolioGrid = document.getElementById('portfolioGrid');
+            portfolioGrid.innerHTML = '';
+            
+            items.forEach(item => {
+                const portfolioItem = document.createElement('div');
+                portfolioItem.className = `portfolio-item ${item.category}`;
+                portfolioItem.innerHTML = `
+                    <div class="portfolio-img">
+                        <img src="${item.url}" alt="${item.title}" loading="lazy">
+                    </div>
+                    <div class="portfolio-info">
+                        <h3>${item.title}</h3>
+                        <p>${item.category.charAt(0).toUpperCase() + item.category.slice(1)}</p>
+                        <a href="#" class="portfolio-link"><i class="fas fa-eye"></i></a>
+                    </div>
+                `;
+                
+                // Add click event to show modal
+                portfolioItem.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showProjectModal(item.title, item.category, item.url);
+                });
+                
+                portfolioGrid.appendChild(portfolioItem);
+            });
+            
+            // Initialize portfolio items with animation
+            const portfolioItems = document.querySelectorAll('.portfolio-item');
+            portfolioItems.forEach((item, index) => {
+                item.style.animationDelay = `${index * 0.1}s`;
+                item.classList.add('animate');
+            });
+        }
+
+        // Show Project Modal
+        function showProjectModal(title, category, imageUrl) {
+            const modal = document.getElementById('projectModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalCategory = document.getElementById('modalCategory');
+            const modalImage = document.getElementById('modalImage');
+            
+            // Set modal content
+            modalTitle.textContent = title;
+            modalCategory.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+            modalImage.src = imageUrl;
+            modalImage.alt = title;
+            
+            // Show modal
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            // Close modal when clicking X
+            document.querySelector('.close-modal').addEventListener('click', () => {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        }
+
+        // Load portfolio when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPortfolioItems();
+        });
+    </script>
+
+    <style>
+        /* Additional Styles for Portfolio Page */
+        .portfolio {
+            padding: 80px 0;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+            grid-column: 1 / -1;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #ff6b6b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Project Modal Styles */
+        .project-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            max-width: 900px;
+            width: 90%;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
+            background: #ff6b6b;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .modal-image-container {
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+        }
+
+        .modal-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #f5f5f5;
+        }
+
+        .modal-info {
+            padding: 30px;
+        }
+
+        .modal-info h3 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #2d3436;
+        }
+
+        .modal-category {
+            color: #ff6b6b;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .modal-image-container {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .modal-content {
+                margin: 20px auto;
+                width: 95%;
+            }
+
+            .modal-info {
+                padding: 20px;
+            }
+
+            .modal-info h3 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Upload CMS | Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #6c5ce7;
+            --accent-color: #00cec9;
+            --dark-color: #2d3436;
+            --light-color: #f9f9f9;
+            --gray-color: #dfe6e9;
+            --text-color: #333;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+            background-color: var(--light-color);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Admin Header */
+        .admin-header {
+            background: var(--dark-color);
+            padding: 20px 0;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .admin-header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-title h1 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+        }
+
+        .admin-title span {
+            font-weight: 300;
+            font-size: 1rem;
+            display: block;
+            color: var(--gray-color);
+        }
+
+        .admin-nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+
+        .admin-nav a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .admin-nav a:hover, .admin-nav a.active {
+            background: var(--primary-color);
+        }
+
+        /* Main Content */
+        .admin-main {
+            padding: 40px 0;
+        }
+
+        .admin-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--gray-color);
+        }
+
+        .card-header h2 {
+            color: var(--dark-color);
+            font-size: 1.5rem;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--gray-color);
+            border-radius: 5px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #ff5252;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        /* File Upload Styles */
+        .file-upload {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            border: 2px dashed var(--gray-color);
+            border-radius: 10px;
+            transition: var(--transition);
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary-color);
+        }
+
+        .file-upload i {
+            font-size: 3rem;
+            color: var(--gray-color);
+            margin-bottom: 15px;
+            transition: var(--transition);
+        }
+
+        .file-upload:hover i {
+            color: var(--primary-color);
+        }
+
+        .file-upload-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-upload p {
+            color: var(--dark-color);
+            text-align: center;
+        }
+
+        .file-upload span {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        /* Image Preview */
+        .image-preview {
+            display: none;
+            margin: 20px 0;
+            position: relative;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .remove-preview {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--primary-color);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(255, 107, 107, 0.5);
+        }
+
+        /* Upload Progress */
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: var(--gray-color);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--dark-color);
+        }
+
+        /* Upload History */
+        .upload-history {
+            margin-top: 40px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--gray-color);
+        }
+
+        .history-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .history-item {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+
+        .history-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .history-img {
+            height: 180px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .history-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .history-item:hover .history-img img {
+            transform: scale(1.1);
+        }
+
+        .history-info {
+            padding: 15px;
+        }
+
+        .history-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: var(--dark-color);
+        }
+
+        .history-info p {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .history-actions {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .history-actions a {
+            padding: 5px;
+            color: var(--dark-color);
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .copy-link:hover {
+            color: var(--secondary-color);
+        }
+
+        .delete-item:hover {
+            color: var(--primary-color);
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background: rgba(0, 206, 201, 0.1);
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .alert-error {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .admin-header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .admin-nav ul {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .history-list {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+
+        @media (max-width: 576px) {
+            .file-upload {
+                padding: 20px;
+            }
+
+            .history-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="container">
+            <div class="admin-header-content">
+                <div class="admin-title">
+                    <h1>Project CMS</h1>
+                    <span>Upload and manage your project images</span>
+                </div>
+                <nav class="admin-nav">
+                    <ul>
+                        <li><a href="#" class="active">Projects</a></li>
+                        <li><a href="#">Settings</a></li>
+                        <li><a href="#">Logout</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <div class="container">
+            <!-- Upload Form Card -->
+            <div class="admin-card">
+                <div class="card-header">
+                    <h2>Upload New Project</h2>
+                </div>
+                <div id="alertBox" class="alert"></div>
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label for="projectTitle">Project Title</label>
+                        <input type="text" class="form-control" id="projectTitle" placeholder="Enter project title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="projectCategory">Project Category</label>
+                        <select class="form-control" id="projectCategory" required>
+                            <option value="">Select category</option>
+                            <option value="logos">Logos</option>
+                            <option value="websites">Websites</option>
+                            <option value="branding">Branding</option>
+                            <option value="apps">Mobile Apps</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Project Image</label>
+                        <div class="file-upload" id="fileUploadArea">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Drag & drop or <span>browse</span> your file</p>
+                            <input type="file" class="file-upload-input" id="projectImage" accept="image/*" required>
+                        </div>
+                        <div class="image-preview" id="imagePreview">
+                            <img src="" alt="Image Preview" id="previewImg">
+                            <div class="remove-preview" id="removePreview">
+                                <i class="fas fa-times"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-container" id="progressContainer">
+                        <div class="progress-bar">
+                            <div class="progress" id="uploadProgress"></div>
+                        </div>
+                        <div class="progress-text" id="progressText">Uploading... 0%</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="uploadBtn">Upload Project</button>
+                </form>
+            </div>
+
+            <!-- Recent Uploads Card -->
+            <div class="admin-card upload-history">
+                <div class="history-header">
+                    <h2>Recent Uploads</h2>
+                    <button class="btn btn-primary" id="refreshHistory">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                <div class="history-list" id="historyList">
+                    <!-- Upload history items will be added here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Firebase Scripts -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL, listAll, deleteObject } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-storage.js";
+        
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB3gnDogubz8PUjmYyhQMTJ3V8bCmBp2mk",
+            authDomain: "pitia-11c72.firebaseapp.com",
+            projectId: "pitia-11c72",
+            storageBucket: "pitia-11c72.appspot.com",
+            messagingSenderId: "109156481662",
+            appId: "1:109156481662:web:d2822c6e7b5cbb11e0362f",
+            measurementId: "G-GN5M73D9YE"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const storage = getStorage(app);
+        
+        // DOM Elements
+        const uploadForm = document.getElementById('uploadForm');
+        const projectTitle = document.getElementById('projectTitle');
+        const projectCategory = document.getElementById('projectCategory');
+        const projectImage = document.getElementById('projectImage');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+        const removePreview = document.getElementById('removePreview');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const progressText = document.getElementById('progressText');
+        const historyList = document.getElementById('historyList');
+        const refreshHistory = document.getElementById('refreshHistory');
+        const alertBox = document.getElementById('alertBox');
+        
+        // Handle file selection for preview
+        projectImage.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    previewImg.src = event.target.result;
+                    imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Remove image preview
+        removePreview.addEventListener('click', () => {
+            imagePreview.style.display = 'none';
+            projectImage.value = '';
+        });
+        
+        // Handle form submission
+        uploadForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const title = projectTitle.value.trim();
+            const category = projectCategory.value;
+            const file = projectImage.files[0];
+            
+            if (!title || !category || !file) {
+                showAlert('Please fill all fields and select an image', 'error');
+                return;
+            }
+            
+            uploadFile(title, category, file);
+        });
+        
+        // Upload file to Firebase Storage
+        function uploadFile(title, category, file) {
+            // Create a sanitized filename (replace spaces and special chars)
+            const sanitizedTitle = title.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+            const timestamp = new Date().getTime();
+            const filename = `${sanitizedTitle}_${timestamp}`;
+            const fileExtension = file.name.split('.').pop();
+            
+            // Create a storage reference
+            const storageRef = ref(storage, `${category}/${filename}.${fileExtension}`);
+            
+            // Upload file with progress monitoring
+            const uploadTask = uploadBytesResumable(storageRef, file);
+            
+            // Show progress bar
+            progressContainer.style.display = 'block';
+            uploadBtn.disabled = true;
+            
+            // Monitor upload progress
+            uploadTask.on('state_changed', 
+                (snapshot) => {
+                    // Track progress
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    uploadProgress.style.width = progress + '%';
+                    progressText.textContent = `Uploading... ${Math.round(progress)}%`;
+                },
+                (error) => {
+                    // Handle errors
+                    console.error('Upload failed:', error);
+                    showAlert('Upload failed: ' + error.message, 'error');
+                    progressContainer.style.display = 'none';
+                    uploadBtn.disabled = false;
+                },
+                () => {
+                    // Upload completed successfully
+                    getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                        // Store metadata (you could save this to Firestore if needed)
+                        const metadata = {
+                            title: title,
+                            category: category,
+                            filename: `${filename}.${fileExtension}`,
+                            downloadUrl: downloadURL,
+                            timestamp: timestamp
+                        };
+                        
+                        // For now, just log it
+                        console.log('File uploaded successfully:', metadata);
+                        
+                        // Show success message
+                        showAlert('Project uploaded successfully!', 'success');
+                        
+                        // Reset form
+                        uploadForm.reset();
+                        imagePreview.style.display = 'none';
+                        progressContainer.style.display = 'none';
+                        uploadBtn.disabled = false;
+                        
+                        // Refresh history
+                        loadUploadHistory();
+                    });
+                }
+            );
+        }
+        
+        // Show alert message
+        function showAlert(message, type) {
+            alertBox.textContent = message;
+            alertBox.className = `alert alert-${type}`;
+            alertBox.style.display = 'block';
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Load upload history
+        function loadUploadHistory() {
+            historyList.innerHTML = '<p>Loading upload history...</p>';
+            
+            // Get all categories
+            const categories = ['logos', 'websites', 'branding', 'apps'];
+            let allItems = [];
+            let loadedCategories = 0;
+            
+            categories.forEach(category => {
+                const categoryRef = ref(storage, category);
+                
+                // List all items in this category
+                listAll(categoryRef)
+                    .then((res) => {
+                        // For each item, get its metadata and download URL
+                        const promises = res.items.map(itemRef => {
+                            return getDownloadURL(itemRef)
+                                .then(url => {
+                                    // Extract title from filename
+                                    const filename = itemRef.name;
+                                    let title = filename.split('_')[0]; // Get the first part before underscore
+                                    title = title.charAt(0).toUpperCase() + title.slice(1); // Capitalize first letter
+                                    title = title.replace(/_/g, ' '); // Replace underscores with spaces
+                                    
+                                    return {
+                                        title: title,
+                                        category: category,
+                                        filename: filename,
+                                        url: url,
+                                        fullPath: itemRef.fullPath
+                                    };
+                                });
+                        });
+                        
+                        return Promise.all(promises);
+                    })
+                    .then(items => {
+                        allItems = [...allItems, ...items];
+                        loadedCategories++;
+                        
+                        // When all categories are loaded, display items
+                        if (loadedCategories === categories.length) {
+                            displayHistoryItems(allItems);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error loading history:", error);
+                        loadedCategories++;
+                        
+                        if (loadedCategories === categories.length) {
+                            if (allItems.length === 0) {
+                                historyList.innerHTML = '<p>No uploads found. Upload your first project!</p>';
+                            } else {
+                                displayHistoryItems(allItems);
+                            }
+                        }
+                    });
+            });
+        }
+        
+        // Display history items
+        function displayHistoryItems(items) {
+            // Sort by most recent first (if timestamp is in filename)
+            items.sort((a, b) => {
+                const timestampA = a.filename.split('_')[1] ? parseInt(a.filename.split('_')[1]) : 0;
+                const timestampB = b.filename.split('_')[1] ? parseInt(b.filename.split('_')[1]) : 0;
+                return timestampB - timestampA;
+            });
+            
+            if (items.length === 0) {
+                historyList.innerHTML = '<p>No uploads found. Upload your first project!</p>';
+                return;
+            }
+            
+            historyList.innerHTML = '';
+            
+            items.forEach(item => {
+                // Create history item
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                
+                // Format category for display
+                const displayCategory = item.category.charAt(0).toUpperCase() + item.category.slice(1);
+                
+                historyItem.innerHTML = `
+                    <div class="history-img">
+                        <img src="${item.url}" alt="${item.title}">
+                    </div>
+                    <div class="history-info">
+                        <h3>${item.title}</h3>
+                        <p>${displayCategory}</p>
+                        <div class="history-actions">
+                            <a href="#" class="copy-link" data-url="${item.url}">
+                                <i class="fas fa-link"></i> Copy Link
+                            </a>
+                            <a href="#" class="delete-item" data-path="${item.fullPath}">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        </div>
+                    </div>
+                `;
+                
+                historyList.appendChild(historyItem);
+            });
+            
+            // Add event listeners for copy and delete actions
+            addHistoryItemListeners();
+        }
+        
+        // Add event listeners to history items
+        function addHistoryItemListeners() {
+            // Copy link functionality
+            document.querySelectorAll('.copy-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const url = link.getAttribute('data-url');
+                    navigator.clipboard.writeText(url)
+                        .then(() => {
+                            showAlert('Link copied to clipboard!', 'success');
+                        })
+                        .catch(err => {
+                            console.error('Failed to copy: ', err);
+                            showAlert('Failed to copy link', 'error');
+                        });
+                });
+            });
+            
+            // Delete item functionality
+            document.querySelectorAll('.delete-item').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (confirm('Are you sure you want to delete this item?')) {
+                        const path = link.getAttribute('data-path');
+                        const itemRef = ref(storage, path);
+                        
+                        deleteObject(itemRef)
+                            .then(() => {
+                                showAlert('Item deleted successfully', 'success');
+                                loadUploadHistory(); // Refresh the list
+                            })
+                            .catch(error => {
+                                console.error('Delete failed:', error);
+                                showAlert('Failed to delete item', 'error');
+                            });
+                    }
+                });
+            });
+        }
+        
+        // Refresh history button
+        refreshHistory.addEventListener('click', () => {
+            loadUploadHistory();
+        });
+        
+        // Load history when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUploadHistory();
+        });
+    </script>
+</body>
+</html>
